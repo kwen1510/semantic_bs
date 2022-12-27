@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Beautiful Soup</title>
+  </head>
+  <body>
+    <main>
+        <h1>Beautiful Soup</h1>  
+    </main>
+
+    <div>
+      <label for="queryText">Question:</label><br>
+      <input type="text" id="queryText" name="queryText"><br>
+      <button onclick="sendData()" id="submitButton">Submit</button>
+    </div>
+
+    <div id="responseDiv"></div>
+
+	<script>
+
+    // Define all elements
+    var votingDiv = document.getElementById("votingDiv")
+    
+    // Get the input field
+    var input = document.getElementById("queryText");
+
+    // Execute a function when the user presses a key on the keyboard
+    input.addEventListener("keypress", function(event) {
+      // If the user presses the "Enter" key on the keyboard
+      if (event.key === "Enter") {
+        // Cancel the default action, if needed
+        event.preventDefault();
+        // Trigger the button element with a click
+        submitButton.click();
+      }
+    });
+
+    function sendVote(vote){
+
+      // Get data from session storage
+      let result = sessionStorage.getItem("result");
+
+      result = JSON.parse(result)
+
+      // Reveal voting buttons
+      votingDiv.style.display = "none"
+
+    }
+
+    function populateContent(result){
+
+      result = JSON.parse(result)
+
+      var responseBox = document.getElementById("responseDiv")
+
+      // Clear innerHTML of responseBox
+      responseBox.innerHTML = ""
+
+      var innerHTML = ''
+
+      // Get all responses and populate HTML
+      var responses = result['response']
+
+      for (var i=0; i<responses.length; i++){
+
+        var response = responses[i]
+
+        innerHTML += `<h3>Response ${i+1}</a></h3>
+                      <p>${response}</p>
+                      <br>
+                      `
+      }
+
+      // Repopulate responseBox
+      responseBox.innerHTML = innerHTML
+      
+      // Store result in session storage
+      sessionStorage.setItem("result", JSON.stringify(result));
+
+      // Reveal voting buttons
+      votingDiv.style.display = "block"
+    }
+
+    function sendData(){
+
+      var responseBox = document.getElementById("responseDiv")
+      responseBox.innerHTML = ""
+
+      let url = "https://7whiuw.deta.dev/query/"
+
+      let queryString = document.getElementById("queryText").value
+
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      var raw = JSON.stringify({
+        "query_string": queryString,
+      });
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+      };
+
+      fetch(url, requestOptions)
+        .then(response => response.text())
+        // .then(result => responseBox.innerHTML = result)
+        .then(result => populateContent(result))
+        .catch(error => console.log('error', error));
+          }
+
+  </script>
+  </body>
+</html>
